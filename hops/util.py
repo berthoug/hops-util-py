@@ -147,7 +147,7 @@ def get_requests_verify(hostname, port):
     return False
 
 
-def send_request(method, resource, data=None, headers=None):
+def send_request(method, resource, data=None, headers=None, stream=False):
     """
     Sends a request to Hopsworks. In case of Unauthorized response, submit the request once more as jwt might not
     have been read properly from local container.
@@ -171,12 +171,12 @@ def send_request(method, resource, data=None, headers=None):
     req = requests.Request(method, url, data=data, headers=headers)
     prepped = session.prepare_request(req)
 
-    response = session.send(prepped, verify=verify)
+    response = session.send(prepped, verify=verify, stream=stream)
 
     if response.status_code == constants.HTTP_CONFIG.HTTP_UNAUTHORIZED:
         set_auth_header(headers)
         prepped = session.prepare_request(req)
-        response = session.send(prepped)
+        response = session.send(prepped, stream=stream)
     return response
 
 def _parse_rest_error(response_dict):
